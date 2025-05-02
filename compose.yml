@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgrest_user
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: ordersDB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  postgrest:
+    image: postgrest/postgrest
+    container_name: postgrest
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      PGRST_DB_URI: postgres://postgrest_user:secretpassword@db:5432/ordersDB
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_SERVER_PORT: 3000
+    volumes:
+    - ./postgrest.conf:/etc/postgrest.conf
+
+volumes:
+  pgdata:
